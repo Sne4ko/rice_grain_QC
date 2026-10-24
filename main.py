@@ -11,7 +11,7 @@ IMAGE_PATH = DATA_PATH / IMAGE_NAME
 def main() -> None:
     run_preprocessing_pipeline(IMAGE_PATH)
     img = load_image(str(IMAGE_PATH))
-    binary, dist, seeds, markers = segment_rice(img)
+    binary, dist, seeds, markers = segment_rice(img,seed_ratio=0.2)
     contours = detect_contours(markers)
     contours_img=draw_contours(img, contours)
     df = extract_features(contours)
