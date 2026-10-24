@@ -33,12 +33,12 @@ def show_pipeline(img,dist,markers,seeds,binary,contour_img):
     plt.tight_layout()
     plt.show()
 
-def segment_rice(img):
+def segment_rice(img,seed_ratio=0.7):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     _, binary = cv2.threshold(gray,0,255,cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     mask = (binary > 0).astype(np.uint8)  #binary for distance transform
     dist = cv2.distanceTransform(mask,cv2.DIST_L2,cv2.DIST_MASK_PRECISE)
-    seed_cutoff = 0.7* dist.max()#à ajuster
+    seed_cutoff = seed_ratio * dist.max()#à ajuster
     seeds = (dist > seed_cutoff).astype(np.uint8)
     _, markers = cv2.connectedComponents(seeds)
     markers = markers + 1
