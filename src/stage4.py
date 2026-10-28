@@ -66,25 +66,13 @@ def detect_contours(markers):
 
 def draw_contours(img, contours):
     output = img.copy()
-
     for i, cnt in enumerate(contours):
         cv2.drawContours(output, [cnt], -1, (0,255,0), 2)
-
         M = cv2.moments(cnt)
         if M["m00"] != 0:
             cx = int(M["m10"]/M["m00"])
             cy = int(M["m01"]/M["m00"])
-
-            cv2.putText(
-                output,
-                str(i),
-                (cx, cy),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0,0,255),
-                2
-            )
-
+            cv2.putText(output,str(i),(cx, cy),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,255),2)
     return output
 
 def extract_features(contours, min_area=50):
@@ -110,14 +98,13 @@ def compute_statistics(df):
     total = len(df)
     whole = (df["Class"] == "Whole").sum()
     broken = (df["Class"] == "Broken").sum()
-
     whole_pct = 100 * whole / total
     broken_pct = 100 * broken / total
     print(f"Threshold AR   : {AR_THRESHOLD}")
     print(f"Detected grains: {total}")
     print(f"Whole grains   : {whole} ({whole_pct:.2f}%)")
     print(f"Broken grains  : {broken} ({broken_pct:.2f}%)")
-
+    
     print("\n===== ASPECT RATIO STATISTICS =====")
     print(df["Aspect_Ratio"].describe())
     print("\nMean AR   :", df["Aspect_Ratio"].mean())
@@ -135,9 +122,5 @@ def compute_statistics(df):
 
 
 def classify_grains(df, threshold=AR_THRESHOLD):
-    df["Class"] = np.where(
-        df["Aspect_Ratio"] >= threshold,
-        "Whole",
-        "Broken"
-    )
+    df["Class"] = np.where(df["Aspect_Ratio"] >= threshold,"Whole","Broken")
     return df
