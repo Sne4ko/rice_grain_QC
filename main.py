@@ -15,10 +15,11 @@ def main() -> None:
     contours = detect_contours(markers)
     contours_img=draw_contours(img, contours)
     df = extract_features(contours)
+    df = classify_grains(df,3.15) 
     compute_statistics(df)
     show_pipeline(img,dist,markers,seeds,binary,contours_img)
     print("\nFeature Table")
     print(df)
-
+    
 if __name__ == "__main__":
     main()
