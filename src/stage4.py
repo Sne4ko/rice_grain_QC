@@ -100,7 +100,6 @@ def compute_statistics(df):
     broken = (df["Class"] == "Broken").sum()
     whole_pct = 100 * whole / total
     broken_pct = 100 * broken / total
-    print(f"Threshold AR   : {AR_THRESHOLD}")
     print(f"Detected grains: {total}")
     print(f"Whole grains   : {whole} ({whole_pct:.2f}%)")
     print(f"Broken grains  : {broken} ({broken_pct:.2f}%)")
@@ -119,8 +118,7 @@ def compute_statistics(df):
     plt.title("Aspect Ratio Distribution")
     plt.grid(True)
     plt.show()
-
-
-def classify_grains(df, threshold=AR_THRESHOLD):
+    
+def classify_grains(df, threshold=3.15):
     df["Class"] = np.where(df["Aspect_Ratio"] >= threshold,"Whole","Broken")
     return df
