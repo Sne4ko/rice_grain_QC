@@ -2,6 +2,10 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
 
 # Processig function
 def load_image(path):
@@ -38,7 +42,7 @@ def segment_rice(img,seed_ratio=0.7):
     _, binary = cv2.threshold(gray,0,255,cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     mask = (binary > 0).astype(np.uint8)  #binary for distance transform
     dist = cv2.distanceTransform(mask,cv2.DIST_L2,cv2.DIST_MASK_PRECISE)
-    seed_cutoff = seed_ratio * dist.max()#à ajuster
+    seed_cutoff = seed_ratio* dist.max()#à ajuster
     seeds = (dist > seed_cutoff).astype(np.uint8)
     _, markers = cv2.connectedComponents(seeds)
     markers = markers + 1
@@ -62,7 +66,25 @@ def detect_contours(markers):
 
 def draw_contours(img, contours):
     output = img.copy()
-    cv2.drawContours(output,contours,-1,(0, 255, 0),2)
+
+    for i, cnt in enumerate(contours):
+        cv2.drawContours(output, [cnt], -1, (0,255,0), 2)
+
+        M = cv2.moments(cnt)
+        if M["m00"] != 0:
+            cx = int(M["m10"]/M["m00"])
+            cy = int(M["m01"]/M["m00"])
+
+            cv2.putText(
+                output,
+                str(i),
+                (cx, cy),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0,0,255),
+                2
+            )
+
     return output
 
 def extract_features(contours, min_area=50):
@@ -85,4 +107,37 @@ def compute_statistics(df):
         print("No grains detected.")
         return
     print("\n===== RESULTS =====")
-    print(f"Detected objects : {len(df)}")
+    total = len(df)
+    whole = (df["Class"] == "Whole").sum()
+    broken = (df["Class"] == "Broken").sum()
+
+    whole_pct = 100 * whole / total
+    broken_pct = 100 * broken / total
+    print(f"Threshold AR   : {AR_THRESHOLD}")
+    print(f"Detected grains: {total}")
+    print(f"Whole grains   : {whole} ({whole_pct:.2f}%)")
+    print(f"Broken grains  : {broken} ({broken_pct:.2f}%)")
+
+    print("\n===== ASPECT RATIO STATISTICS =====")
+    print(df["Aspect_Ratio"].describe())
+    print("\nMean AR   :", df["Aspect_Ratio"].mean())
+    print("Median AR :", df["Aspect_Ratio"].median())
+    print("Min AR    :", df["Aspect_Ratio"].min())
+    print("Max AR    :", df["Aspect_Ratio"].max())
+    print("Std AR    :", df["Aspect_Ratio"].std())
+    plt.figure(figsize=(6,4))
+    plt.hist(df["Aspect_Ratio"], bins=10, edgecolor="black")
+    plt.xlabel("Aspect Ratio")
+    plt.ylabel("Number of grains")
+    plt.title("Aspect Ratio Distribution")
+    plt.grid(True)
+    plt.show()
+
+
+def classify_grains(df, threshold=AR_THRESHOLD):
+    df["Class"] = np.where(
+        df["Aspect_Ratio"] >= threshold,
+        "Whole",
+        "Broken"
+    )
+    return df
