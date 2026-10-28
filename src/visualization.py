@@ -35,8 +35,19 @@ def plot_preprocessing_steps(
         (segmented_display, "Watershed boundaries"),
     )
 
-    figure, axes = plt.subplots(1, len(images), figsize=PLOT_FIGSIZE)
-    for axis, (image, title) in zip(axes, images):
+
+    figure = plt.figure(figsize=PLOT_FIGSIZE)
+    grid = figure.add_gridspec(2, 6)
+    slots = (
+        grid[0, 0:3],
+        grid[0, 3:6],
+        grid[1, 0:2],
+        grid[1, 2:4],
+        grid[1, 4:6],
+    )
+
+    for slot, (image, title) in zip(slots, images):
+        axis = figure.add_subplot(slot)
         axis.imshow(image, cmap="gray" if image.ndim == 2 else None)
         axis.set_title(title)
         axis.axis("off")
